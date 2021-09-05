@@ -13,7 +13,7 @@ export default function App() {
       <h2>Ban rent-seeking to see some magic happen!</h2>
       practical economics
       <br />
-      If the impossibility is unforseeable, it's intent to harm
+      If the impossibility is&nbsp;<span style={{textDecoration:"underline"}}>un</span>forseeable, it's intent to harm
       <br />
       <br />
       rent-caps can be in quantity - by price is not helpful
