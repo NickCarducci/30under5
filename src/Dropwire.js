@@ -1,29 +1,42 @@
 import React from "react";
+import ExecutionEnvironment from "exenv";
 class Cable extends React.Component {
   constructor(props) {
     super(props);
     this.state = { limit: [], cache: null };
     this.page = React.createRef();
   }
+  componentDidMount() {
+    if (ExecutionEnvironment.canUseDOM) {
+      this.setState({ go: true });
+    }
+  }
   componentDidUpdate = (prevProps) => {
-    if (this.props.scrolling !== prevProps.scrolling) {
+    if (this.state.go && this.props.scrolling !== prevProps.scrolling) {
       const { cache } = this.state;
-      const { scrollTopAndHeight, scrollTop } = this.props;
+      const { scrollTopAndHeight, scrollTop, girth, timeout } = this.props;
+      var girt = girth ? girth : 1000;
+      var timeou = timeout ? timeout : 1500;
       var continuee = this.props.fwd.current;
       if (!continuee && !cache) return;
       clearTimeout(this.setset);
       this.setset = setTimeout(() => {
         var page = this.page.current;
         var between =
-          page.offsetTop - scrollTop > -1000 &&
-          scrollTopAndHeight - page.offsetTop > -1000;
+          page.offsetTop - scrollTop > Number(`-${girt}`) &&
+          scrollTopAndHeight - page.offsetTop > Number(`-${girt}`);
         if (!continuee) continuee = cache;
         this.setState({ cache: continuee, between }, () => {
-          if (!between) return continuee.remove();
-          if (page.children[0] !== this.state.cache)
+          if (!between && continuee) {
+            return continuee.remove(continuee);
+          }
+          if (
+            page.children &&
+            !page.children.find((s) => s === this.state.cache)
+          )
             page.appendChild(this.state.cache);
         });
-      }, 1000);
+      }, timeou);
     }
   };
   componentWillUnmount = () => {
@@ -32,17 +45,18 @@ class Cable extends React.Component {
   render() {
     const { between, continuee } = this.state;
     const { src, float, title, img } = this.props;
-    //const limited = limit.find((x) => x === Object.keys(this.props.fwd));
+    const onError = (e) => {
+      //this.props.fwd.current.remove();
+      this.props.onError(e);
+    };
     return (
       <div ref={this.page}>
         {!continuee || between ? (
           src === "" ? (
-            <span ref={this.props.fwd} style={{ border: "1px gray solid" }}>
-              {title}
-            </span>
+            <span style={{ border: "1px gray solid" }}>{title}</span>
           ) : img ? (
             <img
-              onError={this.props.onError}
+              onError={onError}
               alt={title}
               style={{
                 shapeOutside: "rect()",
@@ -57,7 +71,7 @@ class Cable extends React.Component {
             />
           ) : (
             <iframe
-              onError={this.props.onError}
+              onError={onError}
               title={title}
               style={{
                 shapeOutside: "rect()",
